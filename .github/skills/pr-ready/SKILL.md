@@ -5,7 +5,7 @@ description: Take a keytype branch from "code written" to "merged" - go vet and 
 
 # Getting a keytype branch merged
 
-1. **Focused local run.** `go vet ./... && go test ./...` (the whole suite takes a few seconds and needs no hardware, so running all of it is fine). If `firmware/` changed: `arduino-cli compile --fqbn arduino:avr:leonardo --warnings all firmware/keytype`, with no warnings from `keytype.ino`.
+1. **Focused local run.** `gofmt -l .` (must print nothing), then `go vet ./... && go test ./...` (the whole suite takes a few seconds and needs no hardware, so running all of it is fine). If `firmware/` changed: `arduino-cli compile --fqbn arduino:avr:leonardo --warnings all firmware/keytype`, with no warnings from `keytype.ino`.
 2. **Affected-tests selector:** none; the suite is small.
 3. **Never run locally:** nothing is off limits. Flashing a board (`arduino-cli upload`) needs one plugged in and is a manual check, not a gate.
 4. **CI checks:** workflow `CI`. `go (ubuntu-latest)`, `go (windows-latest)` and `go (macos-latest)` are three legs of one matrix, plus `firmware`. Wait for all four.
