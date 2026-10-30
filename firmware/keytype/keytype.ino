@@ -2,7 +2,8 @@
 // over the board's USB serial port.
 //
 // Runs on any ATmega32U4 board with native USB (DFRobot Beetle, Arduino
-// Leonardo, SparkFun Pro Micro and clones). Flash it as "Arduino Leonardo".
+// Leonardo or Micro, SparkFun Pro Micro and clones). Flash it as the board
+// arduino-cli's "board list" reports: "Arduino Leonardo" or "Arduino Micro".
 //
 // Protocol: one command per line ('\n'), one reply line per command.
 //   P            ping            -> "OK keytype 1"
@@ -18,6 +19,11 @@
 const char VERSION[] = "keytype 1";
 const size_t LINE_MAX = 130;   // 'T' plus 64 bytes of hex, with room to spare
 const unsigned int HOLD_MS = 20;  // how long a key combination is held
+const unsigned int TAP_MS = 10;   // how long a typed key is held, and the gap either side of its Shift
+
+// The US-layout key under each shifted character, so Shift can go down on its own first.
+const char SHIFTED[] = "~!@#$%^&*()_+{}|:\"<>?";
+const char UNSHIFTED[] = "`1234567890-=[]\\;',./";
 
 char line[LINE_MAX + 1];
 size_t lineLen = 0;
@@ -74,6 +80,36 @@ int decodeHex(char *s, size_t n) {
   return n / 2;
 }
 
+// baseKey returns the unshifted character on the same key as c, and whether c needs Shift.
+char baseKey(char c, bool *shift) {
+  *shift = true;
+  if (c >= 'A' && c <= 'Z') return c - 'A' + 'a';
+  const char *p = c ? strchr(SHIFTED, c) : NULL;
+  if (p) return UNSHIFTED[p - SHIFTED];
+  *shift = false;
+  return c;
+}
+
+// typeKey types c the way a person's keyboard does: Shift goes down in its own
+// report before the key and comes up after it. Keyboard.write sends Shift and
+// the key in one report, and nProtect's key protection then reads "!" as "1"
+// and "A" as "a", though Windows itself gets them right.
+void typeKey(char c) {
+  bool shift;
+  uint8_t k = (uint8_t)baseKey(c, &shift);
+  if (shift) {
+    Keyboard.press(KEY_LEFT_SHIFT);
+    delay(TAP_MS);
+  }
+  Keyboard.press(k);
+  delay(TAP_MS);
+  Keyboard.release(k);
+  if (shift) {
+    delay(TAP_MS);
+    Keyboard.release(KEY_LEFT_SHIFT);
+  }
+}
+
 void handle(char *cmd, size_t n) {
   if (n == 0) {
     Serial.println("ERR empty command");
@@ -117,7 +153,7 @@ void handle(char *cmd, size_t n) {
         return;
       }
       for (int i = 0; i < count; i++) {
-        Keyboard.write((uint8_t)arg[i]);
+        typeKey(arg[i]);
         delay(keyDelay);
       }
       Serial.println("OK");

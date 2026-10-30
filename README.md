@@ -22,7 +22,7 @@ Also works: Arduino Leonardo, Arduino Micro, SparkFun Pro Micro and the many 32U
 
 The firmware is a small Arduino sketch in [`firmware/keytype`](firmware/keytype/keytype.ino).
 
-**With the Arduino IDE:** open `firmware/keytype/keytype.ino`, choose **Tools → Board → Arduino AVR Boards → Arduino Leonardo**, pick the board's port, and click **Upload**.
+**With the Arduino IDE:** open `firmware/keytype/keytype.ino`, choose **Tools → Board → Arduino AVR Boards → Arduino Leonardo** (or **Arduino Micro** if that is what the board reports; some Beetles do), pick the board's port, and click **Upload**.
 
 **With [arduino-cli](https://arduino.github.io/arduino-cli/):**
 
@@ -80,7 +80,7 @@ dev.Press("ctrl+s")
 ## Limits
 
 - **US-ASCII only.** A keyboard sends keys, not characters, and the computer's keyboard layout decides which character a key makes. keytype types as a US layout, so set the target computer's layout to US English. Accented letters, Hangul, emoji and other non-ASCII text are refused with an error rather than typed wrongly. (To enter Hangul, switch the target's input method to Korean and type the romanized keys, for example `dkssud` for 안녕.)
-- Roughly 100 characters a second by default. Raise `-delay` if an app drops characters.
+- Roughly 60 characters a second by default, and about half that for capitals and symbols. Each key is held for 10 ms, and Shift goes down in its own USB report before the key and comes up after it, as on a person's keyboard. Sending Shift and the key in one report is faster, and Windows reads it correctly, but nProtect's key protection on Korean banking sites read `!` as `1` and `A` as `a` that way. Raise `-delay` if an app drops characters.
 
 ## Protocol
 
