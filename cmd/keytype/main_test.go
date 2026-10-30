@@ -56,6 +56,16 @@ func TestTypeStdin(t *testing.T) {
 	}
 }
 
+func TestTypeStdinDropsByteOrderMark(t *testing.T) {
+	fb := useFake(t)
+	if err := run([]string{"type"}, strings.NewReader("\ufeffpass\r\n"), &bytes.Buffer{}); err != nil {
+		t.Fatal(err)
+	}
+	if (*fb).typed != "pass\r\n" {
+		t.Fatalf("typed %q", (*fb).typed)
+	}
+}
+
 func TestTypeRejectsBadTextWithoutOpeningBoard(t *testing.T) {
 	fb := useFake(t)
 	if err := run([]string{"type", "안녕"}, nil, &bytes.Buffer{}); err == nil {
