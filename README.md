@@ -59,6 +59,8 @@ keytype type -delay 30ms "slow typing"    # slow down for apps that drop keys
 keytype ports                             # list USB serial ports
 ```
 
+Text from standard input is typed as it is, newlines included, so a trailing newline presses Enter. Windows PowerShell adds one to everything it pipes, and a byte order mark in front, which keytype drops.
+
 The board is found automatically among Arduino, SparkFun and DFRobot USB devices. To pick one yourself, pass `-port COM5` (Windows), `-port /dev/ttyACM0` (Linux) or `-port /dev/cu.usbmodem1101` (macOS), or set `KEYTYPE_PORT`.
 
 Key names for `keys` (case-insensitive, joined with `+`): `ctrl`, `shift`, `alt`, `win` (also `cmd`, `gui`, `super`), the right-hand `rctrl`, `rshift`, `ralt`/`altgr`, `rwin`; `enter`, `esc`, `tab`, `space`, `backspace`, `delete`, `insert`, `home`, `end`, `pageup`, `pagedown`, `up`, `down`, `left`, `right`, `f1`–`f12`, `capslock`, `printscreen`, `scrolllock`, `pause`, `menu`; any single printable character such as `a`, `5` or `/`; and `plus` for `+`.

@@ -128,7 +128,9 @@ func typeText(port string, args []string, stdin io.Reader) error {
 		if err != nil {
 			return fmt.Errorf("read standard input: %w", err)
 		}
-		text = string(data)
+		// Windows PowerShell prepends a UTF-8 byte order mark when it pipes
+		// text to a program; it marks the encoding and is never meant as a key.
+		text = strings.TrimPrefix(string(data), "\ufeff")
 	}
 	if *enter {
 		text += "\n"
